@@ -1,0 +1,3 @@
+mod conversation_buffer_window;
+
+pub use conversation_buffer_window::ConversationBufferWindowMemory;

@@ -113,10 +113,10 @@ impl Client {
         let url = format!("{}", self.base_url);
 
         // リクエスト内容をデバッグ出力
-        let request_json = serde_json::to_string_pretty(&request).unwrap();
-        println!("URL: {}", url);
-        println!("Authorization: Bearer {}", self.api_key);
-        println!("Request JSON: {}", request_json);
+        // let request_json = serde_json::to_string_pretty(&request).unwrap();
+        // println!("URL: {}", url);
+        // println!("Authorization: Bearer {}", self.api_key);
+        // println!("Request JSON: {}", request_json);
         /////////////////////////
 
         let response = self
