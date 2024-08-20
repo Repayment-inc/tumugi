@@ -10,18 +10,19 @@ async fn test_conversation_buffer_window_memory() -> Result<(), Box<dyn std::err
     let api_key = std::env::var("GROQ_API_KEY").expect("API_KEY must be set");
     let client = Client::new(api_key, MODEL_GROQ.to_string());
     
-    // ConversationBufferWindowMemoryの初期化（ウィンドウサイズ5）
-    let mut memory = ConversationBufferWindowMemory::new(5);
+    // ConversationBufferWindowMemoryの初期化（ウィンドウサイズ4）
+    let mut memory = ConversationBufferWindowMemory::new(8);
 
     // システムメッセージを追加
-    memory.add_message(ChatMessage::system("常に日本語で回答して".to_string()));
+    memory.add_message(ChatMessage::system("あなたの名前はジェニファーです。常に日本語で回答して".to_string()));
 
     // ユーザーとの対話をシミュレート
     let conversations = vec![
-        "今からいう文章を覚えてくれる?",
-        "わたしはりんごが嫌いです",
-        "みかんは好きでも嫌いでもないです",
-        "私は何が嫌いですか?",
+        "はじめまして",
+        "あなたの名前はなんですか?",
+        "私はみかんが好きです",
+        "私は何が好きですか?",
+        "私は最初になんと言いましたか?",
     ];
 
     for user_input in conversations.iter() {
@@ -42,13 +43,26 @@ async fn test_conversation_buffer_window_memory() -> Result<(), Box<dyn std::err
         assert!(!chat_res.choices[0].message.content.is_empty());
     }
 
+
+    // 現在のメモリの状態を表示
+    println!("\nCurrent memory state:");
+    for (i, msg) in memory.get_messages().iter().enumerate() {
+        println!("  [{}] {}: {}", i, msg.role, msg.content);
+    }
+    println!("--------------------------------------------------");
+
+    // 4番目のアシスタントの返答が期待される内容を含むことを確認
+    let res = memory.get_messages().get(4).unwrap().clone();
+    println!("Response: {:?}", res.content);
+    assert!(res.role == "assistant");
+    assert!(res.content.contains("みかん"));
+
     
     // 最後のアシスタントの返答が期待される内容を含むことを確認
     let last_response = memory.get_messages().last().unwrap().clone();
-    
     println!("Response: {:?}", last_response.content);
     assert!(last_response.role == "assistant");
-    assert!(last_response.content.contains("りんごが嫌い"));
+    assert!(!last_response.content.contains("はじめまして"));
 
     Ok(())
 }
