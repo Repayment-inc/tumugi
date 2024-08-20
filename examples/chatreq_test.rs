@@ -17,7 +17,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let model =  MODEL_GROQ;
     let client = Client::new(api_key, model.to_string()	);
 
-	let question = "猫の猫種は何種類?";
+	let question = "2015年、北米で行われた『North American Parkour Championships 』という大会で優勝を果たした人物は誰ですか?";
+	let answer = "ZENです。";
+	let question_2 = "北米のどこで行われましたか?";
+	let answer_2 = "カナダ・バンクーバーです。";
+	let question_3 = "ZENはどこの国の人ですか?";
 
 	let chat_req = ChatRequest::new(model.to_string(), vec![
 		ChatMessage {
@@ -27,6 +31,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		ChatMessage {
             role: "user".to_string(),
 			content: question.to_string(),
+		},
+		ChatMessage {
+            role: "assistant".to_string(),
+			content: answer.to_string(),
+		},
+		ChatMessage {
+            role: "user".to_string(),
+			content: question_2.to_string(),
+		},
+		ChatMessage {
+            role: "assistant".to_string(),
+			content: answer_2.to_string(),
+		},
+		ChatMessage {
+            role: "user".to_string(),
+			content: question_3.to_string(),
 		},
 	]);
 
