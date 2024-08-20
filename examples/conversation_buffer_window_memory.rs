@@ -10,20 +10,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api_key = std::env::var("GROQ_API_KEY").expect("API_KEY must be set");
     let client = Client::new(api_key, MODEL_GROQ.to_string());
     
-    // ConversationBufferWindowMemoryの初期化（ウィンドウサイズ5）
-    let mut memory = ConversationBufferWindowMemory::new(5);
+    // ConversationBufferWindowMemoryの初期化
+    let mut memory = ConversationBufferWindowMemory::new(8);
 
-    // システムメッセージを追加
-    memory.add_message(ChatMessage::system("常に日本語で回答して".to_string()));
+    // システムメッセージを設定
+    memory.set_system_message(ChatMessage::system("常に日本語で回答して".to_string()));
 
     // ユーザーとの対話をシミュレート
     let conversations = vec![
         "今からいう文章を覚えてくれる?",
-        "わたしはりんごが嫌いです",
-        "みかんは好きでも嫌いでもないです",
+        "わたしはりんごが嫌いです", // これより前は窓外になる
+        "みかんは好きです",
+        "私は何が好きですか?",
+        "最初の質問は何でしたか?",
         "私は何が嫌いですか?",
-        // "Thank you for the information!",
-        // "What was our first topic of conversation?", // これは窓外になる可能性がある
     ];
 
     for (i, user_input) in conversations.iter().enumerate() {
