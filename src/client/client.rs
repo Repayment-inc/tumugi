@@ -105,6 +105,10 @@ impl Client {
         }
     }
 
+    pub fn model(&self) -> &str {
+        &self.model
+    }
+
     /// チャット完了を作成する非同期メソッド
     pub async fn create_chat_completion(
         &self,
