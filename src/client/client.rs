@@ -1,6 +1,7 @@
 use serde::{Serialize, Deserialize};
 pub use thiserror::Error;
 use serde_json::json;
+use std::sync::Arc;
 
 /// チャット完了リクエスト 最小構成
 #[derive(Serialize, Deserialize)]
@@ -60,9 +61,10 @@ impl ChatMessage {
 }
 // endregion: --- ChatMessage
 
-
+#[derive(Clone)]
 pub struct Client {
-    client: reqwest::Client,
+    client: Arc<reqwest::Client>,
+    // client: reqwest::Client // groqの際はArcを外さないとできないっぽい
     model: String,
     api_key: String,
     base_url: String,
@@ -98,7 +100,8 @@ impl Client {
             _ => "https://api.openai.com/v1/chat/completions", // デフォルトはOpenAI
         };
         Self {
-            client: reqwest::Client::new(),
+            client: Arc::new(reqwest::Client::new()), 
+            // client: reqwest::Client::new() // groqの際はArcを外さないとできないっぽい
             model,
             api_key: api_key.to_string(),
             base_url: base_url.to_string(),
@@ -117,10 +120,10 @@ impl Client {
         let url = format!("{}", self.base_url);
 
         // リクエスト内容をデバッグ出力
-        // let request_json = serde_json::to_string_pretty(&request).unwrap();
-        // println!("URL: {}", url);
+        let request_json = serde_json::to_string_pretty(&request).unwrap();
+        println!("URL: {}", url);
         // println!("Authorization: Bearer {}", self.api_key);
-        // println!("Request JSON: {}", request_json);
+        println!("Request JSON: {}", request_json);
         /////////////////////////
 
         let response = self

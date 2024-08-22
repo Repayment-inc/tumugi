@@ -25,6 +25,10 @@ pub enum AgentError {
     #[error("Task not found: {0}")]
     TaskNotFound(String),
 
+    /// 通信エラー
+    #[error("Communication error")]
+    CommunicationError,
+
     /// その他のエラー
     #[error("Other error: {0}")]
     Other(String),
