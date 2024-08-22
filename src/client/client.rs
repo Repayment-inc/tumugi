@@ -119,7 +119,7 @@ impl Client {
     ) -> Result<ChatResponse, ChatError> {
         let url = format!("{}", self.base_url);
 
-        // リクエスト内容をデバッグ出力
+        // リクエスト内容をデバッグ出力 //
         let request_json = serde_json::to_string_pretty(&request).unwrap();
         println!("URL: {}", url);
         // println!("Authorization: Bearer {}", self.api_key);
@@ -136,6 +136,11 @@ impl Client {
 
         if response.status().is_success() {
             let chat_response = response.json().await?;
+
+            // リクエスト内容をデバッグ出力 //
+            println!("Response JSON: {:?}", &chat_response);
+            /////////////////////////
+            
             Ok(chat_response)
         } else {
             Err(ChatError::ParseError(format!(
