@@ -1,6 +1,5 @@
 use super::self_refine_agent::SelfRefineAgent;
-use crate::client::Client;
-use crate::error::AgentError;
+use crate::error::{AgentError, TumugiError};
 
 pub struct SelfRefineSystem {
     agent: SelfRefineAgent,
@@ -8,11 +7,12 @@ pub struct SelfRefineSystem {
 }
 
 impl SelfRefineSystem {
-    pub fn new(client: Client, iterations: usize, memory_size: usize) -> Self {
-        Self {
-            agent: SelfRefineAgent::new("自己改善AI".to_string(), client, memory_size),
+    pub fn new(api_key: String, model: String, iterations: usize, memory_size: usize) -> Result<Self, TumugiError> {
+        let agent = SelfRefineAgent::new("自己改善AI".to_string(), api_key, model, memory_size)?;
+        Ok(Self {
+            agent,
             iterations,
-        }
+        })
     }
 
     pub async fn process(&mut self, prompt: &str) -> Result<String, AgentError> {

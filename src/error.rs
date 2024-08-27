@@ -1,35 +1,35 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum AIError {
+pub enum TumugiError {
     #[error("AI API request failed: {0}")]
-    RequestFailed(String),
+    RequestFailed(#[from] reqwest::Error),
     #[error("AI response parsing failed: {0}")]
     ParseError(String),
     #[error("Provider specific error: {0}")]
     ProviderError(String),
+    #[error("Unsupported AI model: {0}")]
+    UnsupportedModel(String),
+    #[error("API error: {0}")]
+    ApiError(String),
 }
 
-/// エージェントに関連するエラーを表す列挙型
 #[derive(Error, Debug)]
 pub enum AgentError {
-    /// クライアントエラー
     #[error("Client error: {0}")]
-    ClientError(#[from] crate::client::ChatError),
-
-    /// タスク実行エラー
+    ClientError(#[from] TumugiError),
     #[error("Task execution error: {0}")]
     TaskExecutionError(String),
-
-    /// タスクが見つからないエラー
     #[error("Task not found: {0}")]
     TaskNotFound(String),
-
-    /// 通信エラー
     #[error("Communication error")]
     CommunicationError,
-
-    /// その他のエラー
     #[error("Other error: {0}")]
     Other(String),
+}
+
+impl From<serde_json::Error> for TumugiError {
+    fn from(err: serde_json::Error) -> Self {
+        TumugiError::ParseError(err.to_string())
+    }
 }

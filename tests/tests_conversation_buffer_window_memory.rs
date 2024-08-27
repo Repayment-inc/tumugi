@@ -1,4 +1,4 @@
-use tumugi::client::{ChatMessage, ChatRequest, Client};
+use tumugi::client::{ChatMessage, ChatRequest, ClientFactory};
 use tumugi::memory::ConversationBufferWindowMemory;
 use dotenv::dotenv;
 
@@ -8,7 +8,7 @@ const MODEL_GROQ: &str = "llama3-8b-8192";
 async fn test_conversation_buffer_window_memory() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
     let api_key = std::env::var("GROQ_API_KEY").expect("API_KEY must be set");
-    let client = Client::new(api_key, MODEL_GROQ.to_string());
+    let client = ClientFactory::create_client(api_key, MODEL_GROQ.to_string())?;
     
     // ConversationBufferWindowMemoryの初期化（ウィンドウサイズ4）
     let mut memory = ConversationBufferWindowMemory::new(8);

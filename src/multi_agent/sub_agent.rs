@@ -1,14 +1,16 @@
-use crate::client::{ChatMessage, ChatRequest, Client};
+use crate::client::{AIClient, ChatMessage, ChatRequest};
 use crate::error::AgentError;
+use std::sync::Arc;
 
 pub struct SubAgent {
     role: String,
-    client: Client,
+    client: Arc<dyn AIClient>,
+    model: String,
 }
 
 impl SubAgent {
-    pub fn new(role: String, client: Client) -> Self {
-        Self { role, client }
+    pub fn new(role: String, client: Arc<dyn AIClient>, model: String) -> Self {
+        Self { role, client, model }
     }
 
     pub async fn process(&self, goal: &str) -> Result<String, AgentError> {
@@ -17,7 +19,7 @@ impl SubAgent {
             self.role, goal
         );
         let chat_req = ChatRequest::new(
-            self.client.model().to_string(),
+            self.model.clone(),
             vec![ChatMessage::user(prompt)],
         );
         let chat_res = self.client.create_chat_completion(chat_req).await?;

@@ -1,25 +1,29 @@
-use crate::client::{Client, ChatMessage, ChatRequest};
-use crate::error::AgentError;
+use crate::client::{AIClient, ClientFactory, ChatMessage, ChatRequest};
+use crate::error::{AgentError, TumugiError};
 use crate::memory::ConversationBufferWindowMemory;
+use std::sync::Arc;
 
 pub struct SelfRefineAgent {
     role: String,
-    client: Client,
+    client: Arc<dyn AIClient>,
     memory: ConversationBufferWindowMemory,
+    model: String,
 }
 
 impl SelfRefineAgent {
-    pub fn new(role: String, client: Client, memory_size: usize) -> Self {
-        Self {
+    pub fn new(role: String, api_key: String, model: String, memory_size: usize) -> Result<Self, TumugiError> {
+        let client = ClientFactory::create_client(api_key, model.clone())?;
+        Ok(Self {
             role,
             client,
+            model,
             memory: ConversationBufferWindowMemory::new(memory_size),
-        }
+        })
     }
 
     pub async fn generate(&mut self, prompt: &str) -> Result<String, AgentError> {
         let chat_req = ChatRequest::new(
-            self.client.model().to_string(),
+            self.model.clone(),
             vec![
                 ChatMessage::system(format!("あなたは{}です。与えられた指示に従って文章を生成してください。", self.role)),
                 ChatMessage::user(prompt.to_string()),
@@ -37,7 +41,7 @@ impl SelfRefineAgent {
 
     pub async fn evaluate(&mut self, text: &str) -> Result<String, AgentError> {
         let chat_req = ChatRequest::new(
-            self.client.model().to_string(),
+            self.model.clone(),
             vec![
                 ChatMessage::system("あなたは文章評価者です。与えられた文章を評価し、改善点を具体的に指摘してください。".to_string()),
                 ChatMessage::user(text.to_string()),
@@ -55,7 +59,7 @@ impl SelfRefineAgent {
 
     pub async fn refine(&mut self, original_text: &str, feedback: &str) -> Result<String, AgentError> {
         let chat_req = ChatRequest::new(
-            self.client.model().to_string(),
+            self.model.clone(),
             vec![
                 ChatMessage::system(format!("あなたは{}です。与えられた文章を改善してください。", self.role)),
                 ChatMessage::user(format!("元の文章: {}\n\nフィードバック: {}\n\n改善された文章を生成してください。", original_text, feedback)),

@@ -1,25 +1,25 @@
-use crate::client::{Client, ChatMessage, ChatRequest};
+use crate::client::{AIClient, ChatMessage, ChatRequest};
 use crate::error::AgentError;
 use std::collections::HashMap;
-// use regex::Regex;
+use std::sync::Arc;
 
 pub struct CommanderAgent {
-    client: Client,
+    client: Arc<dyn AIClient>,
+    model: String,
 }
 
 impl CommanderAgent {
-    pub fn new(client: Client) -> Self {
-        Self { client }
+    pub fn new(client: Arc<dyn AIClient>, model: String) -> Self {
+        Self { client, model }
     }
 
-    //　役割を決定する
     pub async fn determine_roles(&self, goal: &str, max_roles: usize) -> Result<Vec<String>, AgentError> {
         let prompt = format!(
             "目標: {}。この目標を達成するために必要な役割を、最大{}個まで挙げてください。回答は以下の形式に厳密に従ってください：\n\nROLES:\n- [役割1]\n- [役割2]\n- [役割3]\n\n他の説明は不要です。",
             goal, max_roles
         );
         let chat_req = ChatRequest::new(
-            self.client.model().to_string(),
+            self.model.clone(),
             vec![ChatMessage::user(prompt)],
         );
         let chat_res = self.client.create_chat_completion(chat_req).await?;
@@ -109,7 +109,7 @@ impl CommanderAgent {
                 goal, summary
             );
         let chat_req = ChatRequest::new(
-            self.client.model().to_string(),
+            self.model.clone(),
             vec![ChatMessage::user(prompt)],
         );
         let chat_res = self.client.create_chat_completion(chat_req).await?;

@@ -1,14 +1,13 @@
 use tumugi::multi_agent::system::MultiAgentSystem;
-use tumugi::client::Client;
 use dotenv::dotenv;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
     let api_key = std::env::var("OPENAI_API_KEY").expect("API_KEY must be set");
-    let client = Client::new(api_key, "gpt-4o-mini".to_string());
+    let model = "gpt-4o-mini".to_string();
     
-    let system = MultiAgentSystem::new(client);
+    let system = MultiAgentSystem::new(api_key, model)?;
     
     let goal = "会計ソフトを作りたい";
     let max_sub_agents = 3;

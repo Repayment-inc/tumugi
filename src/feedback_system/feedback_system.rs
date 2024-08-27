@@ -1,6 +1,6 @@
 use super::feedback_agent::FeedbackAgent;
-use crate::client::Client;
-use crate::error::AgentError;
+use crate::client::ClientFactory;
+use crate::error::{AgentError, TumugiError};
 
 pub struct FeedbackSystem {
     generator: FeedbackAgent,
@@ -9,12 +9,17 @@ pub struct FeedbackSystem {
 }
 
 impl FeedbackSystem {
-    pub fn new(generator_client: Client, checker_client: Client, max_iterations: usize) -> Self {
-        Self {
-            generator: FeedbackAgent::new("生成用AI".to_string(), generator_client),
-            checker: FeedbackAgent::new("チェッカー".to_string(), checker_client),
+    pub fn new(generator_api_key: String, generator_model: String, 
+               checker_api_key: String, checker_model: String, 
+               max_iterations: usize) -> Result<Self, TumugiError> {
+        let generator_client = ClientFactory::create_client(generator_api_key, generator_model.clone())?;
+        let checker_client = ClientFactory::create_client(checker_api_key, checker_model.clone())?;
+        
+        Ok(Self {
+            generator: FeedbackAgent::new("生成用AI".to_string(), generator_client, generator_model),
+            checker: FeedbackAgent::new("チェッカー".to_string(), checker_client, checker_model),
             max_iterations,
-        }
+        })
     }
 
     pub async fn process(&self, input: &str) -> Result<String, AgentError> {
